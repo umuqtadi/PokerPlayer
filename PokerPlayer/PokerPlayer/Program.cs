@@ -15,6 +15,12 @@ namespace PokerPlayer
     }
     class PokerPlayer
     {
+        public List<Card> playerHand = new List<Card>();
+
+        public void DrawHand(List<Card> cards)
+        {
+            playerHand = cards;
+        }
         // Enum of different hand types
         public enum HandType
         {
@@ -28,34 +34,81 @@ namespace PokerPlayer
             FourOfAKind,
             StraightFlush,
             RoyalFlush
-
         }
         // Rank of hand that player holds
         public HandType HandRank
         {
-            get;
+            get
+            {
+                if (this.HasRoyalFlush())
+                {
+                    return HandType.RoyalFlush;
+                }
+                else if (this.HasStraightFlush())
+                {
+                    return HandType.StraightFlush;
+                }
+                else if (this.HasFourOfAKind())
+                {
+                    return HandType.FourOfAKind;
+                }
+                else if (this.HasFullHouse())
+                {
+                    return HandType.FullHouse;
+                }
+                else if (this.HasFlush())
+                {
+                    return HandType.Flush;
+                }
+                else if (this.HasStraight())
+                {
+                    return HandType.Straight;
+                }
+                else if (this.HasThreeOfAKind())
+                {
+                    return HandType.ThreeOfAKind;
+                }
+                else if (this.HasTwoPair())
+                {
+                    return HandType.TwoPair;
+                }
+                else if (this.HasPair())
+                {
+                    return HandType.OnePair;
+                }
+                else
+                {
+                    return HandType.HighCard;
+                }
+            }
+
         }
         // Constructor that isn't used
         public PokerPlayer() { }
         public bool HasPair()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Rank).Where(y => y.Count() == 2).Count() == 1;
         }
         public bool HasTwoPair()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 2).Count() == 2;
         }
         public bool HasThreeOfAKind()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasStraight()
         {
+            foreach (var straight in playerHand)
+            {
+                
+            }
             return false;
         }
         public bool HasFlush()
         {
-            return false;
+
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasFullHouse()
         {
@@ -163,40 +216,40 @@ namespace PokerPlayer
     //  *****Card Class Start*****
  class Card
     {
-        public enum CardSuit
-        {
-            Hearts,
-            Diamonds,
-            Clubs,
-            Spades
-        }
-
-        public enum CardRank
-        {
-            two = 2,
-            three,
-            four,
-            five,
-            six,
-            seven,
-            eight,
-            nine,
-            ten,
-            Jack,
-            Queen,
-            King,
-            Ace
-        }
+        
         public CardSuit Suit { get; set; }
         public CardRank Rank { get; set; }
 
-        public Card(Card.CardRank rank, Card.CardSuit suit)
+        public Card(CardRank rank, CardSuit suit)
         {
             this.Suit = suit;
             this.Rank = rank;
         }
     }
+ public enum CardSuit
+ {
+     Heart,
+     Diamond,
+     Club,
+     Spade
+ }
 
+ public enum CardRank
+ {
+     two = 2,
+     three,
+     four,
+     five,
+     six,
+     seven,
+     eight,
+     nine,
+     ten,
+     Jack,
+     Queen,
+     King,
+     Ace
+ }
 
     //  *****Card Class End*******
 }
