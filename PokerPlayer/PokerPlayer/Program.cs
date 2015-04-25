@@ -99,33 +99,54 @@ namespace PokerPlayer
         }
         public bool HasStraight()
         {
-            foreach (var straight in playerHand)
-            {
-                
-            }
-            return false;
+            return (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
         }
         public bool HasFlush()
         {
-
             return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasFullHouse()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Rank).Where(y => y.Count() == 2).Count() == 1 && playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasFourOfAKind()
         {
-            return false;
+            return playerHand.GroupBy(x=> x.Rank).Where(x => x.Count() == 4).Count() == 1;
         }
         public bool HasStraightFlush()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
         }
         public bool HasRoyalFlush()
         {
-            return false;
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4 && playerHand.OrderByDescending(x => x.Rank).First().Equals(Rank.Ace);
         }
+
+        public enum Suit
+        {
+            Heart,
+            Diamond,
+            Club,
+            Spade
+        }
+
+        public enum Rank
+        {
+            two = 2,
+            three,
+            four,
+            five,
+            six,
+            seven,
+            eight,
+            nine,
+            ten,
+            Jack,
+            Queen,
+            King,
+            Ace
+        }
+
     }
     //Guides to pasting your Deck and Card class
 
@@ -158,7 +179,7 @@ namespace PokerPlayer
                 {
                     for (int j = 2; j < 15; j++)
                     {
-                        DeckOfCards.Add(new Card((Card.CardRank)j, (Card.CardSuit)i));
+                        DeckOfCards.Add(new Card((Rank)j, (Suit)i));
                     }
                 }
             }
@@ -217,39 +238,17 @@ namespace PokerPlayer
  class Card
     {
         
-        public CardSuit Suit { get; set; }
-        public CardRank Rank { get; set; }
+       
+        public Rank Rank { get; set; }
+        public Suit Suit { get; set; }
 
-        public Card(CardRank rank, CardSuit suit)
+        public Card(Rank rank, Suit suit)
         {
-            this.Suit = suit;
+            
             this.Rank = rank;
+            this.Suit = suit;
         }
     }
- public enum CardSuit
- {
-     Heart,
-     Diamond,
-     Club,
-     Spade
- }
-
- public enum CardRank
- {
-     two = 2,
-     three,
-     four,
-     five,
-     six,
-     seven,
-     eight,
-     nine,
-     ten,
-     Jack,
-     Queen,
-     King,
-     Ace
- }
 
     //  *****Card Class End*******
 }
