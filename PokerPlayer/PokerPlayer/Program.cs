@@ -87,47 +87,60 @@ namespace PokerPlayer
         public PokerPlayer() 
         { 
         }
-        public bool HighCard()
+        public Card HighCard()
         {
-            playerHand.OrderByDescending(x => x.Rank).First();
-            return true;
+            //orders the card by rank in descending order, then takes the first card which would be the highest card
+            return playerHand.OrderByDescending(x => x.Rank).First();
         }
 
         public bool HasPair()
         {
+            //groups the player hand by rank, checks to see if there is 2 of the same rank, but only for 1 pair
             return playerHand.GroupBy(x => x.Rank).Where(y => y.Count() == 2).Count() == 1;
         }
         public bool HasTwoPair()
         {
+            //groups by rank and checks if there is something on the same rank and if it happens twice
             return playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 2).Count() == 2;
         }
         public bool HasThreeOfAKind()
         {
+            //grouping by rank and then checking if there is a list created with three of the same rank
             return playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasStraight()
         {
+            //ordering by rank and checking if they are all different ranks, then seeing if the difference between the first and last is 4
+            if (playerHand.OrderByDescending(x => x.Rank).First().Rank.Equals(14))
+            {
+                return (playerHand.Distinct().OrderBy(x => x.Rank).First().Rank) - (playerHand.Distinct().OrderBy(x => x.Rank).Take(4).Last().Rank) == 3;
+            }
             return (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
         }
         public bool HasFlush()
         {
+            //checking to make sure all the cards in hand are of the same suit
             return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1;
         }
         public bool HasFullHouse()
         {
+            //grouping the player hands by rank and checking if there is 1 pair and 1 three of a kind
             return playerHand.GroupBy(x => x.Rank).Where(y => y.Count() == 2).Count() == 1 && playerHand.GroupBy(x => x.Rank).Where(x => x.Count() == 3).Count() == 1;
         }
         public bool HasFourOfAKind()
         {
+            //grouping by rank and checking if there is 4 of the same rank, also making sure they are all different suits
             return playerHand.GroupBy(x => x.Suit).Distinct().Count() == 4 && playerHand.GroupBy(x=> x.Rank).Where(x => x.Count() == 4).Count() == 1;
         }
         public bool HasStraightFlush()
         {
-            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
+            //grouping by suit and making sure all cards in hard are same suit, then checking to see if they are in order by rank as well
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && HasStraight();
         }
         public bool HasRoyalFlush()
         {
-            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4 && (int)playerHand.OrderByDescending(x => x.Rank).First().Rank == 14;
+            //checking to see if all cards are the same suit, then checking if they are in order and the top 5 values
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && HasStraight() && (int)playerHand.OrderByDescending(x => x.Rank).First().Rank == 14;
         }
 
     }
