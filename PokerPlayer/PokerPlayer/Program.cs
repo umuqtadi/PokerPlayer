@@ -81,10 +81,18 @@ namespace PokerPlayer
                     return HandType.HighCard;
                 }
             }
-
         }
+
         // Constructor that isn't used
-        public PokerPlayer() { }
+        public PokerPlayer() 
+        { 
+        }
+        public bool HighCard()
+        {
+            playerHand.OrderByDescending(x => x.Rank).First();
+            return true;
+        }
+
         public bool HasPair()
         {
             return playerHand.GroupBy(x => x.Rank).Where(y => y.Count() == 2).Count() == 1;
@@ -103,7 +111,7 @@ namespace PokerPlayer
         }
         public bool HasFlush()
         {
-            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1;
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1;
         }
         public bool HasFullHouse()
         {
@@ -111,40 +119,15 @@ namespace PokerPlayer
         }
         public bool HasFourOfAKind()
         {
-            return playerHand.GroupBy(x=> x.Rank).Where(x => x.Count() == 4).Count() == 1;
+            return playerHand.GroupBy(x => x.Suit).Distinct().Count() == 4 && playerHand.GroupBy(x=> x.Rank).Where(x => x.Count() == 4).Count() == 1;
         }
         public bool HasStraightFlush()
         {
-            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4;
         }
         public bool HasRoyalFlush()
         {
-            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 3).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4 && playerHand.OrderByDescending(x => x.Rank).First().Equals(Rank.Ace);
-        }
-
-        public enum Suit
-        {
-            Heart,
-            Diamond,
-            Club,
-            Spade
-        }
-
-        public enum Rank
-        {
-            two = 2,
-            three,
-            four,
-            five,
-            six,
-            seven,
-            eight,
-            nine,
-            ten,
-            Jack,
-            Queen,
-            King,
-            Ace
+            return playerHand.GroupBy(x => x.Suit).Where(x => x.Count() == 5).Count() == 1 && (playerHand.Distinct().OrderByDescending(x => x.Rank).First().Rank - playerHand.Distinct().OrderByDescending(x => x.Rank).Last().Rank) == 4 && (int)playerHand.OrderByDescending(x => x.Rank).First().Rank == 14;
         }
 
     }
@@ -160,95 +143,110 @@ namespace PokerPlayer
                 return DeckOfCards.Count();
             }
         }
+
         public List<Card> DeckOfCards;
         public List<Card> DiscardedCards;
 
+        //calls number of decks
         public Deck()
             : this(1)
         {
 
         }
+
         public Deck(int numberOfDecks)
         {
             DeckOfCards = new List<Card>();
             DiscardedCards = new List<Card>();
-            for (int k = 0; k < numberOfDecks; k++)
-            {
-                //Init deck with 52 cards
-                for (int i = 0; i < 4; i++)
-                {
-                    for (int j = 2; j < 15; j++)
-                    {
-                        DeckOfCards.Add(new Card((Rank)j, (Suit)i));
-                    }
-                }
-            }
 
+            int suitCounter = 1;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 2; j < 15; j++)
+                {
+                    DeckOfCards.Add(new Card(j, i));
+                }
+                suitCounter++;
+            }
+        }
+
+        public List<Card> Deal(int numberOfCards)
+        {
+            List<Card> dealtCards = DeckOfCards.Take(numberOfCards).ToList<Card>();
+            foreach (Card oneCard in dealtCards)
+            {
+                DeckOfCards.Remove(oneCard);
+            }
+            return dealtCards;
+        }
+
+        public void Shuffle()
+        {
+            Random rng = new Random();
+            List<Card> tempDeck = new List<Card>();
+
+            if (DeckOfCards.Count > 0)
+            {
+                Card tempCard = DeckOfCards.ElementAt(rng.Next(DeckOfCards.Count));
+                DeckOfCards.Remove(tempCard);
+                tempDeck.Add(tempCard);
+            }
+            DeckOfCards = tempDeck;
         }
 
         public void Discard(List<Card> cards)
         {
+            DiscardedCards = new List<Card>();
+
             foreach (Card oneCard in cards)
             {
                 DeckOfCards.Remove(oneCard);
                 DiscardedCards.Add(oneCard);
             }
         }
-        public void Discard(Card card)
-        {
-            DeckOfCards.Remove(card);
-            DiscardedCards.Add(card);
-        }
 
-        public List<Card> Deal(int numberOfCards)
-        {
-            // Get cards to deal
-            List<Card> dealtCards = DeckOfCards.Take(numberOfCards).ToList<Card>();
-            // Remove each card from the DeckOfCards
-            foreach (Card oneCard in dealtCards)
-            {
-                DeckOfCards.Remove(oneCard);
-            }
-            // return dealt cards
-            return dealtCards;
-        }
-        public void Shuffle()
-        {
-            Random rng = new Random();
-            List<Card> tempDeck = new List<Card>();
-
-            // While the deck has cards
-            while (DeckOfCards.Count > 0)
-            {
-                // Pick random card
-                Card tempCard = DeckOfCards.ElementAt(rng.Next(DeckOfCards.Count));
-                // Remove random card from deck
-                DeckOfCards.Remove(tempCard);
-                // Add it to temp deck
-                tempDeck.Add(tempCard);
-            }
-            // Set random card list to our Deck
-            DeckOfCards = tempDeck;
-        }
     }
 
     //  *****Deck Class End*******
 
     //  *****Card Class Start*****
- class Card
+    class Card
     {
-        
-       
+
+
         public Rank Rank { get; set; }
         public Suit Suit { get; set; }
 
-        public Card(Rank rank, Suit suit)
+        public Card(int rank, int suit)
         {
-            
-            this.Rank = rank;
-            this.Suit = suit;
+
+            this.Rank = (Rank)rank;
+            this.Suit = (Suit)suit;
         }
     }
+    public enum Suit
+    {
+        Heart,
+        Diamond,
+        Club,
+        Spade
+    }
 
-    //  *****Card Class End*******
+    public enum Rank
+    {
+        Two = 2,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Ten,
+        Jack,
+        Queen,
+        King,
+        Ace
+    }
 }
